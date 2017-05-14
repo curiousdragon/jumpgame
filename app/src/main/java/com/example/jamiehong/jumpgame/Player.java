@@ -38,13 +38,16 @@ public class Player {
     // Use to access and set the view transformation
     private int mMVPMatrixHandle;
 
+    private float offset = 0.25f;
+    private float size = 0.125f;
+
     // number of coordinates per vertex in this array
     private int COORDS_PER_VERTEX = 3;
     private float squareCoords[] = {
-            -0.25f,  0.25f, 0.0f,  // top left
-            -0.25f, -0.25f, 0.0f,  // bottom left
-            0.25f, -0.25f, 0.0f,   // bottom right
-            0.25f,  0.25f, 0.0f    // top right
+            -size + offset,  size, 0.0f,  // top left
+            -size + offset, -size, 0.0f,  // bottom left
+            size + offset, -size, 0.0f,   // bottom right
+            size + offset,  size, 0.0f    // top right
     };
 
     private final int vertexCount = squareCoords.length / COORDS_PER_VERTEX;

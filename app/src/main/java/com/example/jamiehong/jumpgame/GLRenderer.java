@@ -10,11 +10,13 @@ import javax.microedition.khronos.opengles.GL10;
 public class GLRenderer implements GLSurfaceView.Renderer {
 
     private Player mPlayer;
+    private Spike mSpike;
+    private Ground mGround;
 
     private final float[] mMVPMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
-    private float[] mRotationMatrix = new float[16];
+    //private float[] mRotationMatrix = new float[16];
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
@@ -23,11 +25,18 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
         // initialize a player
         mPlayer = new Player();
+
+        // initialize a spike
+        mSpike = new Spike();
+
+        // initialize the ground
+        mGround = new Ground();
     }
 
     @Override
     public void onDrawFrame(GL10 gl) {
-        float[] scratch = new float[16];
+        float[] scratch_player = new float[16];
+        float[] scratch_spike = new float[16];
 
         // Redraw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
@@ -38,16 +47,28 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
-        Matrix.translateM(mPlayer.mModelMatrix, 0, -0.02f, 0f, 0f);
+        //Matrix.translateM(mPlayer.mModelMatrix, 0, -0.02f, 0f, 0f);
         //Matrix.translateM(the model matrix,
-        // int offset (keep @ 0),
-        // x coordinate (- goes to right, + goes to left),
-        // y coordinate (- goes to down, + goes to up),
+        // int offset (keep @ 0)
+        // x coordinate (- goes to down, + goes to up),
+        // y coordinate (- goes to right, + goes to left),
         // z coordinate( how size changes) (+ gets smaller (further away))
 
-        Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mPlayer.mModelMatrix, 0);
-        mPlayer.draw(scratch);
+        // Calculate: will only be different from mMVPMatrix if mModelMatrix has changed
+        Matrix.multiplyMM(scratch_player, 0, mMVPMatrix, 0, mPlayer.mModelMatrix, 0);
+        // draw the player
+        mPlayer.draw(scratch_player);
 
+        // Calculate the movement of the spike
+        Matrix.translateM(mSpike.mModelMatrix, 0, 0.01f, 0f, 0f);
+
+        // Calculate: will only be different from mMVPMatrix if mModelMatrix has changed
+        Matrix.multiplyMM(scratch_spike, 0, mMVPMatrix, 0, mSpike.mModelMatrix, 0);
+        // draw the spike
+        mSpike.draw(scratch_spike);
+
+        // draw the ground
+        mGround.draw(mMVPMatrix);
     }
 
     @Override
