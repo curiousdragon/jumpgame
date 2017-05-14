@@ -3,6 +3,8 @@ package com.example.jamiehong.jumpgame;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.os.SystemClock;
+import android.support.v4.view.GravityCompat;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -17,6 +19,16 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
     //private float[] mRotationMatrix = new float[16];
+
+    public volatile float mVelocity;
+
+    public float getVelocity() {
+        return mVelocity;
+    }
+
+    public void setVelocity(float velocity) {
+        mVelocity = velocity;
+    }
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
@@ -47,11 +59,14 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
+        // get the velocity from the user
+        Matrix.translateM(mPlayer.mModelMatrix, 0, 0f, mVelocity, 0f);
+
         //Matrix.translateM(mPlayer.mModelMatrix, 0, -0.02f, 0f, 0f);
         //Matrix.translateM(the model matrix,
         // int offset (keep @ 0)
-        // x coordinate (- goes to down, + goes to up),
-        // y coordinate (- goes to right, + goes to left),
+        // x coordinate (- goes to right, + goes to left),
+        // y coordinate (- goes to down, + goes to up),
         // z coordinate( how size changes) (+ gets smaller (further away))
 
         // Calculate: will only be different from mMVPMatrix if mModelMatrix has changed

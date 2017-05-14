@@ -131,6 +131,4 @@ public class Player {
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
-
-
 }
