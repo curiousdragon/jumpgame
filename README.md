@@ -4,7 +4,9 @@ current state:
 
 created Player.java : green square
 
-created Spike.java : 
+created Spike.java : white triangle moving along Ground
+
+created Ground.java : white rectangle at bottom of screen
 
 
 
