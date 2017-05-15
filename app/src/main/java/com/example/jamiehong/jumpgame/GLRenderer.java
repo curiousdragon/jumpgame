@@ -21,6 +21,21 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     //private float[] mRotationMatrix = new float[16];
 
     public volatile float mVelocity;
+    private long mLastTime;
+    public volatile long mStartTime;
+    public volatile boolean duringTap;
+
+    public void setStartTime(long startTime) {
+        this.mStartTime = startTime;
+    }
+
+    public void setDuringTap(boolean duringTap) {
+        this.duringTap = duringTap;
+    }
+
+    public boolean isDuringTap() {
+        return duringTap;
+    }
 
     public float getVelocity() {
         return mVelocity;
@@ -28,6 +43,21 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
     public void setVelocity(float velocity) {
         mVelocity = velocity;
+    }
+
+    public GLRenderer() {
+        mLastTime = System.currentTimeMillis() + 100;
+        mStartTime = 0;
+        duringTap = false;
+    }
+
+    public void onPause() {
+        //pause renderer
+    }
+
+    public void onResume() {
+        //resume renderer
+        mLastTime = System.currentTimeMillis();
     }
 
     @Override
@@ -43,10 +73,22 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
         // initialize the ground
         mGround = new Ground();
+
+        mVelocity = 0f;
     }
 
     @Override
     public void onDrawFrame(GL10 gl) {
+
+        // Get the current time
+        long now = System.currentTimeMillis();
+
+        // We should make sure we are valid and sane
+        if (mStartTime > now) return;
+
+        // Get the amount of time the last frame took.
+        long elapsed = now - mStartTime;
+
         float[] scratch_player = new float[16];
         float[] scratch_spike = new float[16];
 
@@ -59,8 +101,19 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
-        // get the velocity from the user
+
+        if(duringTap) {
+            if(elapsed >= 500 && mVelocity != -0.02f) {
+                mVelocity = -0.02f;
+            } else if(elapsed >= 1000 && mVelocity == -0.02f) {
+                mVelocity = 0f;
+                duringTap = false;
+                Matrix.setIdentityM(mPlayer.mModelMatrix, 0);
+                //mPlayer = new Player();
+            }
+        }
         Matrix.translateM(mPlayer.mModelMatrix, 0, 0f, mVelocity, 0f);
+
 
         //Matrix.translateM(mPlayer.mModelMatrix, 0, -0.02f, 0f, 0f);
         //Matrix.translateM(the model matrix,

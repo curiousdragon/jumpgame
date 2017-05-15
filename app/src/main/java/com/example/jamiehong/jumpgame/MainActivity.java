@@ -2,6 +2,7 @@ package com.example.jamiehong.jumpgame;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -34,22 +35,35 @@ public class MainActivity extends AppCompatActivity {
             // Render the view only when there is a change in the drawing data
             //setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
-            // Render the view constantly (default
+            // Render the view constantly (default)
             //setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         }
 
         @Override
         public boolean onTouchEvent(MotionEvent e) {
             if(e.getAction() == MotionEvent.ACTION_DOWN) {
-                if(mRenderer.getVelocity() == 0.02f) {
-                    mRenderer.setVelocity(-0.02f);
-                } else {
+                if(!mRenderer.isDuringTap()) {
                     mRenderer.setVelocity(0.02f);
+                    mRenderer.setStartTime(System.currentTimeMillis());
+                    mRenderer.setDuringTap(true);
                 }
             }
             //requestRender(); //can be used with RENDERMODE_WHEN_DIRTY
             return true;
         }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+            mRenderer.onPause();
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            mRenderer.onResume();
+        }
+
 
     }
 }
