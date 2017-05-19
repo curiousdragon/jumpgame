@@ -40,8 +40,8 @@ public class Spike {
     private int COORDS_PER_VERTEX = 3;
     private float[] triangleCoords = {
             offset + 0.0f,  height, 0.0f, // top
-            offset - base, -height, 0.0f, // bottom left
-            offset + base, -height, 0.0f // bottom right
+            offset + base, -height, 0.0f, // bottom left
+            offset - base, -height, 0.0f // bottom right
     };
 
     private float[] color = {1.0f, 1.0f, 1.0f, 1.0f}; // white
@@ -116,5 +116,58 @@ public class Spike {
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
+    }
+
+    private float[] movingCoords = new float[triangleCoords.length];
+
+    public void moveSpike(long startTime, long currentTime, float velocity) {
+        long timeElapsed = currentTime - startTime;
+        float distTraveled = 0f;
+        distTraveled = velocity * timeElapsed;
+
+        for(int i = 0; i < movingCoords.length; i++) {
+            movingCoords[i] = triangleCoords[i];
+            if(i % 3 == 0) {
+                movingCoords[i] += distTraveled;
+            }
+        }
+    }
+
+    public float[] getSpikeCoords() {
+        return movingCoords;
+    }
+
+    public boolean collide(Player p) {
+        boolean sameX = false;
+        boolean sameY = false;
+        float[] playerCoords = p.getPlayerCoords();
+        float PlayerLXPos = playerCoords[3];
+        float PlayerRXPos = playerCoords[6];
+        for(int i = 3; i < movingCoords.length; i+= 3) {
+            float SpikeXPos = movingCoords[i];
+            if((SpikeXPos > PlayerLXPos) && (SpikeXPos < PlayerRXPos)) {
+                sameX = true;
+            }
+        }
+
+        if((movingCoords[3] >= PlayerLXPos) && (movingCoords[3] <= PlayerRXPos)) {
+            sameX = true;
+        }
+
+        if(movingCoords[1] >= playerCoords[4]) {
+            sameY = true;
+        }
+        return sameY;
+        //return sameX;
+        //return sameX && sameY;
+        //return true;
+
+        /*
+        if(movingCoords[0] <= 0) {
+            return true;
+        } else {
+            return false;
+        }
+        */
     }
 }

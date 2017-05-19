@@ -43,8 +43,11 @@ public class MainActivity extends AppCompatActivity {
         public boolean onTouchEvent(MotionEvent e) {
             if(e.getAction() == MotionEvent.ACTION_DOWN) {
                 if(!mRenderer.isDuringTap()) {
-                    mRenderer.setVelocity(0.02f);
+                    mRenderer.setVelocity(GLRenderer.PLAYER_VELOCITY);
+                    //mRenderer.setStartTime(SystemClock.elapsedRealtime());
                     mRenderer.setStartTime(System.currentTimeMillis());
+                    //mRenderer.setStartTime(SystemClock.uptimeMillis());
+
                     mRenderer.setDuringTap(true);
                 }
             }

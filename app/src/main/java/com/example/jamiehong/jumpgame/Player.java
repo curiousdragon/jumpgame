@@ -131,4 +131,28 @@ public class Player {
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
+
+    private float[] movingCoords = new float[squareCoords.length];
+
+    public void movePlayer(long timeElapsed, float velocity, boolean hasTapped) {
+        float distTraveled = 0f;
+
+        if(hasTapped) {
+            distTraveled = velocity * timeElapsed;
+        }
+        for(int i = 0; i < movingCoords.length; i++) {
+            movingCoords[i] = squareCoords[i];
+            if(i % 3 == 1) {
+                movingCoords[i] += distTraveled;
+            }
+        }
+    }
+
+    public float[] getPlayerCoords() {
+        return movingCoords;
+    }
+
+    public boolean collide(Spike s) {
+        return s.collide(this);
+    }
 }
