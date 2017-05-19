@@ -24,7 +24,7 @@ public class SpikeGenerator {
     }
 
 
-    public void draw(float[] mvpMatrix) {
+    public void add(float[] mvpMatrix) {
         if ((int)(Math.random() * 10) == 5) {
             list.add(new Spike());
         }
