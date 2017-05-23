@@ -47,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
                     //mRenderer.setStartTime(SystemClock.elapsedRealtime());
                     mRenderer.setStartTime(System.currentTimeMillis());
                     //mRenderer.setStartTime(SystemClock.uptimeMillis());
-
                     mRenderer.setDuringTap(true);
                 }
             }

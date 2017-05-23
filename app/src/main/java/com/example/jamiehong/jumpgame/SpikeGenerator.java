@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 
 public class SpikeGenerator {
+    /*
     public static ArrayList<Spike> list;
 
     public class Pair {
@@ -26,9 +27,10 @@ public class SpikeGenerator {
 
     public void add(float[] mvpMatrix) {
         if ((int)(Math.random() * 10) == 5) {
-            list.add(new Spike());
+            list.add(new Spike(0));
         }
     }
+    */
 
 }
 

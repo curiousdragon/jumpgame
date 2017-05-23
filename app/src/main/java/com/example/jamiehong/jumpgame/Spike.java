@@ -33,9 +33,11 @@ public class Spike {
 
     private int mMVPMatrixHandle;
 
-    public float offset= -2.5f; //portrait mode: -1.5f, landscape: -2.5f
+    public float offset = -2.5f; //portrait mode: -1.5f, landscape: -2.5f
     private float base = 0.125f;
     private float height = 0.125f;
+
+    private long timeOffset;
 
     private int COORDS_PER_VERTEX = 3;
     private float[] triangleCoords = {
@@ -49,7 +51,9 @@ public class Spike {
     private int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
     private int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    public Spike() {
+    public Spike(long timeOffset) {
+        this.timeOffset = timeOffset;
+
         Matrix.setIdentityM(mModelMatrix, 0);
 
         // initialize vertex byte buffer for shape coordinates
@@ -121,9 +125,12 @@ public class Spike {
     private float[] movingCoords = new float[triangleCoords.length];
 
     public void moveSpike(long startTime, long currentTime, float velocity) {
-        long timeElapsed = currentTime - startTime;
-        float distTraveled = 0f;
-        distTraveled = velocity * timeElapsed;
+        long timeElapsed = currentTime - (startTime + timeOffset);
+        int constant = 18;
+        // the larger constant is, the "collision" will happen later (more to left)
+        // the smaller constant is, the "collision" will happen earlier (more to right)
+        float distTraveled = velocity * timeElapsed / constant;
+
 
         for(int i = 0; i < movingCoords.length; i++) {
             movingCoords[i] = triangleCoords[i];
@@ -143,23 +150,27 @@ public class Spike {
         float[] playerCoords = p.getPlayerCoords();
         float PlayerLXPos = playerCoords[3];
         float PlayerRXPos = playerCoords[6];
+
+        /*
         for(int i = 3; i < movingCoords.length; i+= 3) {
             float SpikeXPos = movingCoords[i];
             if((SpikeXPos > PlayerLXPos) && (SpikeXPos < PlayerRXPos)) {
                 sameX = true;
             }
         }
+        */
 
-        if((movingCoords[3] >= PlayerLXPos) && (movingCoords[3] <= PlayerRXPos)) {
+        if(((movingCoords[3] >= PlayerLXPos) && (movingCoords[3] <= PlayerRXPos))
+                || ((movingCoords[6] >= PlayerLXPos) && (movingCoords[6] <= PlayerRXPos))) {
             sameX = true;
         }
 
         if(movingCoords[1] >= playerCoords[4]) {
             sameY = true;
         }
-        return sameY;
+        //return sameY;
         //return sameX;
-        //return sameX && sameY;
+        return sameX && sameY;
         //return true;
 
         /*

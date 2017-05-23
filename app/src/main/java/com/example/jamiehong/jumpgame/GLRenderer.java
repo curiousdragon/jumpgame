@@ -3,8 +3,6 @@ package com.example.jamiehong.jumpgame;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-import android.os.SystemClock;
-import android.support.v4.view.GravityCompat;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -24,6 +22,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     public static final float PLAYER_VELOCITY = 0.02f;
     public volatile long mStartTime;
     public volatile boolean duringTap;
+
+    private long mStartSpikeTime;
 
     public void setStartTime(long startTapTime) {
         this.mStartTime = startTapTime;
@@ -48,6 +48,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     public GLRenderer() {
         mStartTime = 0;
         duringTap = false;
+        mStartSpikeTime = System.currentTimeMillis();
     }
 
     public void onPause() {
@@ -67,7 +68,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         mPlayer = new Player();
 
         // initialize a spike
-        mSpike = new Spike();
+        mSpike = new Spike(0);
 
         // initialize the ground
         mGround = new Ground();
@@ -146,7 +147,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         // draw the spike
         mSpike.draw(scratch_spike);
 
-        mSpike.moveSpike(mStartTime, now, 0.01f);
+        mSpike.moveSpike(mStartSpikeTime, now, 0.01f);
         mPlayer.movePlayer(elapsed, PLAYER_VELOCITY, duringTap);
 
         /*
