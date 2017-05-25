@@ -125,9 +125,13 @@ public class Spike {
 
     private float[] movingCoords = new float[triangleCoords.length];
 
+    public void changeStartTime(long timeStart) {
+        this.timeStart = timeStart;
+    }
+
     public void moveSpike(long currentTime) {
         long timeElapsed = currentTime - timeStart;
-        int constant = 18;
+        int constant = 17;
         // the larger constant is, the "collision" will happen later (more to left)
         // the smaller constant is, the "collision" will happen earlier (more to right)
         float distTraveled = velocity * timeElapsed / constant;
