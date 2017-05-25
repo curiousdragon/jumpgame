@@ -74,9 +74,13 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         mGround = new Ground();
 
         // initialize a spike generator
-        mSpikeGen = new SpikeGenerator();
+        mSpikeGen = new SpikeGenerator(System.currentTimeMillis());
 
         mVelocity = 0f;
+
+
+        mStartSpikeTime = System.currentTimeMillis();
+
 
         mStartTime = System.currentTimeMillis();
     }
@@ -96,7 +100,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         long elapsed = now - mStartTime;
 
         float[] scratch_player = new float[16];
-        float[] scratch_spike = new float[16];
 
         // Redraw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
@@ -139,6 +142,59 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         // draw the player
         mPlayer.draw(scratch_player);
 
+
+/*
+        mSpikeGen.draw(mMVPMatrix);
+
+        long mTimeElapsed = now - mSpikeGen.mPrevSpike;
+        float[] scratch_spike = new float[16];
+
+        mSpikeGen.add();
+
+        for (int i = 0; i < mSpikeGen.list.size(); i ++) {
+            scratch_spike = new float[16];
+            Spike s = mSpikeGen.list.get(i);
+            // Calculate the movement of the spike
+            Matrix.translateM(s.mModelMatrix, 0, s.velocity, 0f, 0f);
+            // Calculate: will only be different from mMVPMatrix if mModelMatrix has changed
+            Matrix.multiplyMM(scratch_spike, 0, mMVPMatrix, 0, s.mModelMatrix, 0);
+            s.draw(scratch_spike);
+            s.moveSpike(now);
+        }
+
+        mSpikeGen.remove();
+*/
+
+        mStartSpikeTime = now - mStartSpikeTime;
+
+        float[] scratch_spike = new float[16];
+
+        if(mStartSpikeTime > 500 &&  mStartSpikeTime < 2500) {
+            mSpikeGen.list.add(new Spike(now));
+            Spike s = mSpikeGen.list.get(0);
+
+            //Matrix.setIdentityM(s.mModelMatrix, 0);
+
+
+            Matrix.translateM(s.mModelMatrix, 0, 0.01f, 0f, 0f);
+            // Calculate: will only be different from mMVPMatrix if mModelMatrix has changed
+            Matrix.multiplyMM(scratch_spike, 0, mMVPMatrix, 0, s.mModelMatrix, 0);
+            s.draw(scratch_spike);
+            s.moveSpike(now);
+
+            if(s.getSpikeCoords()[6] > 1.0) {
+                mSpikeGen.list.remove(0);
+                s = mSpikeGen.list.get(0);
+                Matrix.setIdentityM(s.mModelMatrix, 0);
+            }
+            mSpikeGen.remove();
+        } else if(mStartSpikeTime > 2000) {
+            mStartSpikeTime = now;
+        }
+
+
+
+        /*
         // Calculate the movement of the spike
         Matrix.translateM(mSpike.mModelMatrix, 0, 0.01f, 0f, 0f);
 
@@ -148,26 +204,12 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         mSpike.draw(scratch_spike);
 
         mSpike.moveSpike(mStartSpikeTime, now, 0.01f);
-        mPlayer.movePlayer(elapsed, PLAYER_VELOCITY, duringTap);
-
-        /*
-        // Calculate the movement of the spikes
-        for (Spike spike : SpikeGenerator.list) {
-            Matrix.translateM(spike.mModelMatrix, 0, 0.01f, 0f, 0f);
-
-
-            // Calculate: will only be different from mMVPMatrix if mModelMatrix has changed
-            Matrix.multiplyMM(scratch_spike, 0, mMVPMatrix, 0, spike.mModelMatrix, 0);
-
-
-            // draw the spike
-            spike.draw(scratch_spike);
-        }
         */
+        mPlayer.movePlayer(elapsed, PLAYER_VELOCITY, duringTap);
 
         //testing to see if moveSpike and movePlayer and collide work
         boolean bool = false;
-        if(mPlayer.collide(mSpike) && !bool) {
+        if(mSpikeGen.collide(mPlayer) && !bool) {
             // do something
             bool = true;
             //mGround.draw(mMVPMatrix);

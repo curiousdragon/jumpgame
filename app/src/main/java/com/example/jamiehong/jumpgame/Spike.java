@@ -37,7 +37,8 @@ public class Spike {
     private float base = 0.125f;
     private float height = 0.125f;
 
-    private long timeOffset;
+    private long timeStart;
+    public static final float velocity = 0.01f;
 
     private int COORDS_PER_VERTEX = 3;
     private float[] triangleCoords = {
@@ -51,8 +52,8 @@ public class Spike {
     private int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
     private int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    public Spike(long timeOffset) {
-        this.timeOffset = timeOffset;
+    public Spike(long timeStart) {
+        this.timeStart = timeStart;
 
         Matrix.setIdentityM(mModelMatrix, 0);
 
@@ -124,13 +125,12 @@ public class Spike {
 
     private float[] movingCoords = new float[triangleCoords.length];
 
-    public void moveSpike(long startTime, long currentTime, float velocity) {
-        long timeElapsed = currentTime - (startTime + timeOffset);
+    public void moveSpike(long currentTime) {
+        long timeElapsed = currentTime - timeStart;
         int constant = 18;
         // the larger constant is, the "collision" will happen later (more to left)
         // the smaller constant is, the "collision" will happen earlier (more to right)
         float distTraveled = velocity * timeElapsed / constant;
-
 
         for(int i = 0; i < movingCoords.length; i++) {
             movingCoords[i] = triangleCoords[i];

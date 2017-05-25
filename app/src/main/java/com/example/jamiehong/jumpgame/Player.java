@@ -152,7 +152,9 @@ public class Player {
         return movingCoords;
     }
 
-    public boolean collide(Spike s) {
-        return s.collide(this);
+    /*
+    public boolean collide(SpikeGenerator sGen) {
+        return sGen.collide(this);
     }
+    */
 }
