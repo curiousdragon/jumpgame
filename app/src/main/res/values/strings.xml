@@ -2,4 +2,8 @@
     <string name="app_name">Square Jump</string>
     <string name="button_restart">Play Again</string>
     <string name="button_mainmenu">Return to Main Menu</string>
+    <string name="app_creators">Created by Jamie Hong and Jennifer Li</string>
+    <string name="desc_title">Directions</string>
+    <string name="desc_directions">Play landscape style. Tap to jump. Avoid the spikes!</string>
+    <string name="button_start">Tap to Start</string>
 </resources>
