@@ -49,7 +49,7 @@ public class SpikeGenerator {
 
     public void add() {
         if (mTimeElapsed > mRandTime) {
-            list.add(new Spike(mCurrentTime));
+            //list.add(new Spike(mCurrentTime));
             mRandTime = (long)(Math.random() * 2000) + 500;
             mPrevSpike = mCurrentTime;
         }

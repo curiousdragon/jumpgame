@@ -1,8 +1,6 @@
 package com.example.jamiehong.jumpgame;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -12,6 +10,7 @@ import javax.microedition.khronos.opengles.GL10;
 public class GLRenderer implements GLSurfaceView.Renderer {
     private Player mPlayer;
     private Spike mSpike;
+    private Spike mSpike2;
     private Ground mGround;
 
     private final float[] mMVPMatrix = new float[16];
@@ -23,6 +22,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     public static final float PLAYER_VELOCITY = 0.02f;
     public volatile long mStartTime;
     public volatile boolean duringTap;
+    public static float offset = (float)(Math.random());
+    public static float offset2 = (float)(Math.random());
 
     public void setStartTime(long startTapTime) {
         this.mStartTime = startTapTime;
@@ -66,7 +67,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         mPlayer = new Player();
 
         // initialize a spike
-        mSpike = new Spike(System.currentTimeMillis());
+        timeOfCreation = System.currentTimeMillis();
+        mSpike = new Spike(timeOfCreation, 16.98);
+        mSpike2 = new Spike(timeOfCreation, 17.7777);
 
         // initialize the ground
         mGround = new Ground();
@@ -80,8 +83,14 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         hasCollided = false;
     }
 
+    private boolean spike2HasStarted = false;
+    private long timeOfCreation;
+    private long delayTime = 5000;
+    private long timeConst = 500;
     private boolean offScreen = true;
+    private boolean offScreen2 = true;
     private boolean hasPassedPlayer = false;
+    private boolean hasPassedPlayer2 = false;
     public static int countSpikes;
     public static boolean hasCollided;
 
@@ -89,8 +98,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl) {
         // Get the current time
         long now = System.currentTimeMillis();
-        //long now = SystemClock.elapsedRealtime();
-        //long now = SystemClock.uptimeMillis();
 
         // We should make sure we are valid and sane
         if (mStartTime > now) return;
@@ -147,42 +154,66 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         // STARTING SPIKE RENDERING
 
         float[] scratch_spike = new float[16];
+        float[] scratch_spike2 = new float[16];
 
-        if(mSpike.getSpikeCoords()[6] > 2.5 && !offScreen) {
+        // SPIKE #1
+        // if the spike is off the screen, then give it an offset
+        // and make it loop around
+        if(mSpike.getSpikeCoords()[6] > 2.5 + offset && !offScreen) {
+            offset = (float)(Math.random());
             mSpike.changeStartTime(now);
             Matrix.setIdentityM(mSpike.mModelMatrix, 0);
             Matrix.translateM(mSpike.mModelMatrix, 0, 0.01f, 0f, 0f);
             offScreen = true;
             hasPassedPlayer = false;
         } else {
+            // otherwise keep moving
             // Calculate the movement of the spike
             Matrix.translateM(mSpike.mModelMatrix, 0, 0.01f, 0f, 0f);
             offScreen = false;
         }
 
+        // SPIKE #2
+        long diff = now - timeOfCreation;
+        // if this is the first round, then delay the spike by some amount
+        // then make it move
+        if(diff >= delayTime && diff < delayTime + timeConst && !spike2HasStarted) {
+            mSpike2.changeStartTime(now);
+            Matrix.translateM(mSpike2.mModelMatrix, 0, 0.01f, 0f, 0f);
+            spike2HasStarted = true;
+        } else if(diff >= delayTime + timeConst && spike2HasStarted) {
+            // if this is not the first round, then delay randomly
+            // if the spike goes offscreen, make it loop around
+            if(mSpike2.getSpikeCoords()[6] > 2.5 + offset2 && !offScreen2) {
+                offset2 = (float)(Math.random());
+                mSpike2.changeStartTime(now);
+                Matrix.setIdentityM(mSpike2.mModelMatrix, 0);
+                Matrix.translateM(mSpike2.mModelMatrix, 0, 0.01f, 0f, 0f);
+                offScreen2 = true;
+                hasPassedPlayer2 = false;
+            } else {
+                // Calculate the movement of the spike
+                Matrix.translateM(mSpike2.mModelMatrix, 0, 0.01f, 0f, 0f);
+                offScreen2 = false;
+            }
+
+            // Calculate: will only be different from mMVPMatrix if mModelMatrix has changed
+            Matrix.multiplyMM(scratch_spike2, 0, mMVPMatrix, 0, mSpike2.mModelMatrix, 0);
+            mSpike2.draw(scratch_spike2);
+            mSpike2.moveSpike(now);
+        }
+
+
+
         // Calculate: will only be different from mMVPMatrix if mModelMatrix has changed
         Matrix.multiplyMM(scratch_spike, 0, mMVPMatrix, 0, mSpike.mModelMatrix, 0);
         // draw the spike
         mSpike.draw(scratch_spike);
-
         mSpike.moveSpike(now);
 
 
-        /*
-        boolean bool = false;
-
-        //testing to see if moveSpike and movePlayer and collide work
-        if(mSpike.collide(mPlayer) && !bool) {
-            // do something
-            bool = true;
-            //mGround.draw(mMVPMatrix);
-        }
-
-        if(bool) {
-            mGround.draw(mMVPMatrix);
-        }
-        */
-
+        // if the first spike has collided
+        // stop the activity
         if(mSpike.collide(mPlayer)) {
             hasCollided = true;
             onPause();
@@ -190,6 +221,19 @@ public class GLRenderer implements GLSurfaceView.Renderer {
             hasPassedPlayer = true;
             countSpikes++;
         }
+        // otherwise count how many spikes have been jumped over
+
+
+        // if the second spike has collided
+        // stop the activity
+        if(mSpike2.collide(mPlayer)) {
+            hasCollided = true;
+            onPause();
+        } else if(mSpike2.getSpikeCoords()[6] > 0.125f && !hasPassedPlayer2) {
+            hasPassedPlayer2 = true;
+            countSpikes++;
+        }
+        // otherwise count how many spikes have been jumped over
 
         // draw the ground
         mGround.draw(mMVPMatrix);

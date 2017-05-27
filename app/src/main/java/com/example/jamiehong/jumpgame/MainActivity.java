@@ -1,6 +1,7 @@
 package com.example.jamiehong.jumpgame;
 
 import android.content.Context;
+import android.media.MediaPlayer;
 import android.opengl.GLSurfaceView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,12 +11,18 @@ import android.content.Intent;
 public class MainActivity extends AppCompatActivity {
 
     private GLSurfaceView mGLView;
+    private MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mGLView = new MyGLSurfaceView(this);
         setContentView(mGLView);
+
+        ///*
+        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.debussy_gradus);
+        mediaPlayer.start();
+        //*/
     }
 
     @Override
@@ -26,6 +33,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        ///*
+        mediaPlayer.stop();
+        mediaPlayer.release();
+        //*/
         if(((MyGLSurfaceView) mGLView).endGameCall()) {
             endGame(((MyGLSurfaceView) mGLView).mRenderer.countSpikes);
         }

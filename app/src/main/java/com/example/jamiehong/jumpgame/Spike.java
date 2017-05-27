@@ -38,6 +38,7 @@ public class Spike {
     private float height = 0.125f;
 
     private long timeStart;
+    private double constant;
     public static final float velocity = 0.01f;
 
     private int COORDS_PER_VERTEX = 3;
@@ -52,8 +53,9 @@ public class Spike {
     private int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
     private int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    public Spike(long timeStart) {
+    public Spike(long timeStart, double constant) {
         this.timeStart = timeStart;
+        this.constant = constant;
 
         Matrix.setIdentityM(mModelMatrix, 0);
 
@@ -131,10 +133,9 @@ public class Spike {
 
     public void moveSpike(long currentTime) {
         long timeElapsed = currentTime - timeStart;
-        int constant = 17;
         // the larger constant is, the "collision" will happen later (more to left)
         // the smaller constant is, the "collision" will happen earlier (more to right)
-        float distTraveled = velocity * timeElapsed / constant;
+        float distTraveled = (float)(velocity * timeElapsed / constant);
 
         for(int i = 0; i < movingCoords.length; i++) {
             movingCoords[i] = triangleCoords[i];
@@ -155,15 +156,6 @@ public class Spike {
         float PlayerLXPos = playerCoords[3];
         float PlayerRXPos = playerCoords[6];
 
-        /*
-        for(int i = 3; i < movingCoords.length; i+= 3) {
-            float SpikeXPos = movingCoords[i];
-            if((SpikeXPos > PlayerLXPos) && (SpikeXPos < PlayerRXPos)) {
-                sameX = true;
-            }
-        }
-        */
-
         if(((movingCoords[3] >= PlayerLXPos) && (movingCoords[3] <= PlayerRXPos))
                 || ((movingCoords[6] >= PlayerLXPos) && (movingCoords[6] <= PlayerRXPos))) {
             sameX = true;
@@ -172,17 +164,6 @@ public class Spike {
         if(movingCoords[1] >= playerCoords[4]) {
             sameY = true;
         }
-        //return sameY;
-        //return sameX;
         return sameX && sameY;
-        //return true;
-
-        /*
-        if(movingCoords[0] <= 0) {
-            return true;
-        } else {
-            return false;
-        }
-        */
     }
 }
