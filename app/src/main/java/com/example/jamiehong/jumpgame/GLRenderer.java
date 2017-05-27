@@ -1,16 +1,17 @@
 package com.example.jamiehong.jumpgame;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class GLRenderer implements GLSurfaceView.Renderer {
     private Player mPlayer;
     private Spike mSpike;
-    private SpikeGenerator mSpikeGen;
     private Ground mGround;
 
     private final float[] mMVPMatrix = new float[16];
@@ -22,8 +23,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     public static final float PLAYER_VELOCITY = 0.02f;
     public volatile long mStartTime;
     public volatile boolean duringTap;
-
-    private long mStartSpikeTime;
 
     public void setStartTime(long startTapTime) {
         this.mStartTime = startTapTime;
@@ -37,22 +36,21 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         return duringTap;
     }
 
-    public float getVelocity() {
-        return mVelocity;
-    }
-
     public void setVelocity(float velocity) {
         mVelocity = velocity;
     }
 
-    public GLRenderer() {
+    public Context contxt;
+
+    public GLRenderer(Context context) {
         mStartTime = 0;
         duringTap = false;
-        mStartSpikeTime = System.currentTimeMillis();
+        contxt = context;
     }
 
     public void onPause() {
         //pause renderer
+        ((MainActivity) contxt).onPause();
     }
 
     public void onResume() {
@@ -73,21 +71,22 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         // initialize the ground
         mGround = new Ground();
 
-        // initialize a spike generator
-        mSpikeGen = new SpikeGenerator(System.currentTimeMillis());
-
         mVelocity = 0f;
 
-        mStartSpikeTime = System.currentTimeMillis();
-
         mStartTime = System.currentTimeMillis();
+
+        countSpikes = 0;
+
+        hasCollided = false;
     }
 
-    boolean offScreen = true;
+    private boolean offScreen = true;
+    private boolean hasPassedPlayer = false;
+    public static int countSpikes;
+    public static boolean hasCollided;
 
     @Override
     public void onDrawFrame(GL10 gl) {
-
         // Get the current time
         long now = System.currentTimeMillis();
         //long now = SystemClock.elapsedRealtime();
@@ -154,6 +153,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
             Matrix.setIdentityM(mSpike.mModelMatrix, 0);
             Matrix.translateM(mSpike.mModelMatrix, 0, 0.01f, 0f, 0f);
             offScreen = true;
+            hasPassedPlayer = false;
         } else {
             // Calculate the movement of the spike
             Matrix.translateM(mSpike.mModelMatrix, 0, 0.01f, 0f, 0f);
@@ -168,6 +168,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         mSpike.moveSpike(now);
 
 
+        /*
         boolean bool = false;
 
         //testing to see if moveSpike and movePlayer and collide work
@@ -180,9 +181,18 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         if(bool) {
             mGround.draw(mMVPMatrix);
         }
+        */
+
+        if(mSpike.collide(mPlayer)) {
+            hasCollided = true;
+            onPause();
+        } else if(mSpike.getSpikeCoords()[6] > 0.125f && !hasPassedPlayer) {
+            hasPassedPlayer = true;
+            countSpikes++;
+        }
 
         // draw the ground
-        //mGround.draw(mMVPMatrix);
+        mGround.draw(mMVPMatrix);
     }
 
     @Override

@@ -2,10 +2,10 @@ package com.example.jamiehong.jumpgame;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
-import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
+import android.content.Intent;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -18,6 +18,49 @@ public class MainActivity extends AppCompatActivity {
         setContentView(mGLView);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(((MyGLSurfaceView) mGLView).endGameCall()) {
+            endGame(((MyGLSurfaceView) mGLView).mRenderer.countSpikes);
+        }
+    }
+
+    public static final String EXTRA_MESSAGE = "com.example.jamiehong.MESSAGE";
+
+    public void endGame(int countSpikes) {
+        // create intent for GameOverActivity
+        Intent intent = new Intent(this, GameOverActivity.class);
+
+        // ending message
+        String message = "You successfully jumped over " + countSpikes;
+        // grammar specifics
+        if(countSpikes == 1) {
+            message += " spike!";
+        } else {
+            message += " spikes!";
+        }
+
+        // encouragement
+        if(countSpikes < 10) {
+            message += " Better luck next time!";
+        } else if(countSpikes < 20) {
+            message += " Good job! Keep it up.";
+        } else {
+            message += " Wow! What a pro :)";
+        }
+
+        // send message to next activity
+        intent.putExtra(EXTRA_MESSAGE, message);
+        // start GameOverActivity
+        startActivity(intent);
+    }
+
     class MyGLSurfaceView extends GLSurfaceView {
         private final GLRenderer mRenderer;
 
@@ -27,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
             // Create an OpenGL ES 2.0 context
             setEGLContextClientVersion(2);
 
-            mRenderer = new GLRenderer();
+            mRenderer = new GLRenderer(context);
 
             // Set the Renderer for drawing on the GLSurfaceView
             setRenderer(mRenderer);
@@ -54,6 +97,10 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
+        public boolean endGameCall() {
+            return mRenderer.hasCollided;
+        }
+
         @Override
         public void onPause() {
             super.onPause();
@@ -65,7 +112,5 @@ public class MainActivity extends AppCompatActivity {
             super.onResume();
             mRenderer.onResume();
         }
-
-
     }
 }
