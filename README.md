@@ -9,8 +9,7 @@ created Spike.java : white triangle moving along Ground
 created Ground.java : white rectangle at bottom of screen
 
 To Do:
-create another spike
-randomize wait between spikes
+create another spike, randomize wait between spikes
 
 
 notes: 
