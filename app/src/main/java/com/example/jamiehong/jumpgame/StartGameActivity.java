@@ -12,7 +12,8 @@ public class StartGameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_game);
     }
-
+    
+    // Start the MainActivity, which begins the game
     public void StartGame(View view) {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
