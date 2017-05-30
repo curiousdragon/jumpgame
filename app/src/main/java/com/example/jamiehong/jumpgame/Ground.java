@@ -8,16 +8,16 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 public class Ground {
+    
+    // Used for drawing the ground
     private FloatBuffer vertexBuffer;
     private ShortBuffer drawListBuffer;
-
     private final String vertexShaderCode =
             "uniform mat4 uMVPMatrix;" +
                     "attribute vec4 vPosition;" +
                     "void main() {" +
                     "   gl_Position = uMVPMatrix * vPosition;" +
                     "}";
-
     private final String fragmentShaderCode =
             "precision mediump float;" +
                     "uniform vec4 vColor;" +
