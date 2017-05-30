@@ -292,7 +292,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         }
         // otherwise count how many spikes have been jumped over
 
-        // draw the ground
+        // draw the ground with projection
         mGround.draw(mMVPMatrix);
     }
 
