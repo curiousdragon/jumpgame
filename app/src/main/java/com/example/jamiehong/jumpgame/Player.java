@@ -9,10 +9,13 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 public class Player {
+    // the player is represented by a green square
 
+    // used for drawing the square
     private FloatBuffer vertexBuffer;
     private ShortBuffer drawListBuffer;
 
+    // used for the square's vertices
     private final String vertexShaderCode =
             "uniform mat4 uMVPMatrix;" +
                     "attribute vec4 vPosition;" +
@@ -20,6 +23,7 @@ public class Player {
                     "   gl_Position = uMVPMatrix * vPosition;" +
                     "}";
 
+    // used for shading
     private final String fragmentShaderCode =
             "precision mediump float;" +
                     "uniform vec4 vColor;" +
@@ -27,22 +31,27 @@ public class Player {
                     "   gl_FragColor = vColor;" +
                     "}";
 
+    // used for drawing
     private final int mProgram;
 
     // for draw method
     private int mPositionHandle;
     private int mColorHandle;
 
+    // for any translations of square
     public float[] mModelMatrix = new float[16];
 
     // Use to access and set the view transformation
     private int mMVPMatrixHandle;
 
+    // used for drawing coordinates
     private float offset = 0.25f;
+    // size of the square
     private float size = 0.125f;
 
     // number of coordinates per vertex in this array
     private int COORDS_PER_VERTEX = 3;
+    // initial drawing coords of square
     private float squareCoords[] = {
             -size + offset,  size, 0.0f,  // top left
             -size + offset, -size, 0.0f,  // bottom left
@@ -50,10 +59,12 @@ public class Player {
             size + offset,  size, 0.0f    // top right
     };
 
+
     private final int vertexCount = squareCoords.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
     // Set color with red, green, blue, and alpha (opacity) values
+    // color is green
     private float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 1.0f };
 
     private short drawOrder[] = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
@@ -132,29 +143,35 @@ public class Player {
         GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
 
+    // used to store player's coordinates
     private float[] movingCoords = new float[squareCoords.length];
 
+    // calculating player movements, putting it in movingCoords
     public void movePlayer(long timeElapsed, float velocity, boolean hasTapped) {
         float distTraveled = 0f;
 
+        // if the user has not tapped, then the square has not moved
+        // if the user HAS tapped, then the square has moved
         if(hasTapped) {
+            // calculate the distance traveled
             distTraveled = velocity * timeElapsed;
         }
+
+        // put the new coordinates into movingCoords
         for(int i = 0; i < movingCoords.length; i++) {
             movingCoords[i] = squareCoords[i];
+
+            // if it is movingCoords[1], [4], [7], [10]
+            // then add the distTraveled
+            // (since it means it is the y-coord of one of the vertices)
             if(i % 3 == 1) {
                 movingCoords[i] += distTraveled;
             }
         }
     }
 
+    // getter method for getting the player's coordinates
     public float[] getPlayerCoords() {
         return movingCoords;
     }
-
-    /*
-    public boolean collide(SpikeGenerator sGen) {
-        return sGen.collide(this);
-    }
-    */
 }
