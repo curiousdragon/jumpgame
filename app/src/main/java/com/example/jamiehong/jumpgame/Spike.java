@@ -8,6 +8,8 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 public class Spike {
+
+    // Used for drawing
     private FloatBuffer vertexBuffer;
 
     private final String vertexShaderCode =
@@ -26,6 +28,7 @@ public class Spike {
 
     private final int mProgram;
 
+    // for draw method
     private int mPositionHandle;
     private int mColorHandle;
 
@@ -33,12 +36,14 @@ public class Spike {
 
     private int mMVPMatrixHandle;
 
+    // phone dimensions
     public float offset = -2.5f; //portrait mode: -1.5f, landscape: -2.5f
     private float base = 0.125f;
     private float height = 0.125f;
 
     private long timeStart;
-    private double constant;
+
+    // player's jumping and landing velocity
     public static final float velocity = 0.01f;
 
     private int COORDS_PER_VERTEX = 3;
@@ -48,14 +53,14 @@ public class Spike {
             offset - base, -height, 0.0f // bottom right
     };
 
+    // color of spike (white)
     private float[] color = {1.0f, 1.0f, 1.0f, 1.0f}; // white
 
     private int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
     private int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    public Spike(long timeStart, double constant) {
+    public Spike(long timeStart) {
         this.timeStart = timeStart;
-        this.constant = constant;
 
         Matrix.setIdentityM(mModelMatrix, 0);
 
@@ -133,9 +138,11 @@ public class Spike {
 
     public void moveSpike(long currentTime) {
         long timeElapsed = currentTime - timeStart;
+        // used for collision detection
         // the larger constant is, the "collision" will happen later (more to left)
         // the smaller constant is, the "collision" will happen earlier (more to right)
-        float distTraveled = (float)(velocity * timeElapsed / constant);
+        int constant = 17;
+        float distTraveled = velocity * timeElapsed / constant;
 
         for(int i = 0; i < movingCoords.length; i++) {
             movingCoords[i] = triangleCoords[i];
@@ -149,21 +156,31 @@ public class Spike {
         return movingCoords;
     }
 
+    // Collision detection: check spike and player coordinates against each other
     public boolean collide(Player p) {
+
+        // booleans for checking spike and player coordinates
         boolean sameX = false;
         boolean sameY = false;
+
+        // get player coordinates
         float[] playerCoords = p.getPlayerCoords();
         float PlayerLXPos = playerCoords[3];
         float PlayerRXPos = playerCoords[6];
 
+        // check if the spike and player overlap in X dimension
         if(((movingCoords[3] >= PlayerLXPos) && (movingCoords[3] <= PlayerRXPos))
                 || ((movingCoords[6] >= PlayerLXPos) && (movingCoords[6] <= PlayerRXPos))) {
             sameX = true;
         }
 
+        // check if the spike and player overlap in Y dimension
         if(movingCoords[1] >= playerCoords[4]) {
             sameY = true;
         }
+
+        // return true if spike and player overlap in both dimensions
         return sameX && sameY;
+
     }
 }
