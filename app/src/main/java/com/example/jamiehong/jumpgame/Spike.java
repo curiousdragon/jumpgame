@@ -8,8 +8,8 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 public class Spike {
+    // used for drawing
     private FloatBuffer vertexBuffer;
-
     private final String vertexShaderCode =
             "uniform mat4 uMVPMatrix;" +
                     "attribute vec4 vPosition;" +
@@ -25,20 +25,24 @@ public class Spike {
                     "}";
 
     private final int mProgram;
-
+    
+    // for draw method
     private int mPositionHandle;
     private int mColorHandle;
 
     public float[] mModelMatrix = new float[16];
 
     private int mMVPMatrixHandle;
-
+    
+    // phone dimensions (landscape)
     public float offset = -2.5f; //portrait mode: -1.5f, landscape: -2.5f
     private float base = 0.125f;
     private float height = 0.125f;
 
     private long timeStart;
     private double constant;
+    
+    // player's jumping and landing velocity
     public static final float velocity = 0.01f;
 
     private int COORDS_PER_VERTEX = 3;
@@ -48,6 +52,7 @@ public class Spike {
             offset - base, -height, 0.0f // bottom right
     };
 
+    // sets color of spike (white)
     private float[] color = {1.0f, 1.0f, 1.0f, 1.0f}; // white
 
     private int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
@@ -132,11 +137,14 @@ public class Spike {
     }
 
     public void moveSpike(long currentTime) {
-        long timeElapsed = currentTime - timeStart;
         // the larger constant is, the "collision" will happen later (more to left)
         // the smaller constant is, the "collision" will happen earlier (more to right)
+        long timeElapsed = currentTime - timeStart;
+        
+        // calculate the distance the spike has traveled
         float distTraveled = (float)(velocity * timeElapsed / constant);
 
+        // update distTraveled
         for(int i = 0; i < movingCoords.length; i++) {
             movingCoords[i] = triangleCoords[i];
             if(i % 3 == 0) {
@@ -145,25 +153,36 @@ public class Spike {
         }
     }
 
+    // getter method for spike coordinates
     public float[] getSpikeCoords() {
         return movingCoords;
     }
 
+    // Collision detection:
+    // returns true if spike and player's X and Y coordinates overlap
+    // false otherwise
     public boolean collide(Player p) {
+        
+        // booleans for checking and keeping track
         boolean sameX = false;
         boolean sameY = false;
+        
+        // get player's coordinates
         float[] playerCoords = p.getPlayerCoords();
         float PlayerLXPos = playerCoords[3];
         float PlayerRXPos = playerCoords[6];
 
+        // check X coordinates
         if(((movingCoords[3] >= PlayerLXPos) && (movingCoords[3] <= PlayerRXPos))
                 || ((movingCoords[6] >= PlayerLXPos) && (movingCoords[6] <= PlayerRXPos))) {
             sameX = true;
         }
 
+        // check Y coordinates
         if(movingCoords[1] >= playerCoords[4]) {
             sameY = true;
         }
+        
         return sameX && sameY;
     }
 }
