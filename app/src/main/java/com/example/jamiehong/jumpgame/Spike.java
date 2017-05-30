@@ -30,19 +30,22 @@ public class Spike {
     private int mPositionHandle;
     private int mColorHandle;
 
+    // for any translations of the spike
     public float[] mModelMatrix = new float[16];
 
     private int mMVPMatrixHandle;
     
-    // phone dimensions (landscape)
+    // to fit phone dimensions (landscape)
     public float offset = -2.5f; //portrait mode: -1.5f, landscape: -2.5f
-    private float base = 0.125f;
-    private float height = 0.125f;
+    private float base = 0.125f; // length of spike's base
+    private float height = 0.125f; // height of spike
 
+    // starting time of spike (used to calculate coordinates)
     private long timeStart;
+    // constant used in calculating distance
     private double constant;
     
-    // player's jumping and landing velocity
+    // spikes's jumping and landing velocity
     public static final float velocity = 0.01f;
 
     private int COORDS_PER_VERTEX = 3;
@@ -130,12 +133,16 @@ public class Spike {
         GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
 
+    // coordinates of spike
     private float[] movingCoords = new float[triangleCoords.length];
 
+    // setter method for timeStart
     public void changeStartTime(long timeStart) {
         this.timeStart = timeStart;
     }
 
+    // method to change spike's coordinates
+    // based on how much distance spike has traveled
     public void moveSpike(long currentTime) {
         // the larger constant is, the "collision" will happen later (more to left)
         // the smaller constant is, the "collision" will happen earlier (more to right)
@@ -144,9 +151,10 @@ public class Spike {
         // calculate the distance the spike has traveled
         float distTraveled = (float)(velocity * timeElapsed / constant);
 
-        // update distTraveled
+        // update coordinates with distTraveled
         for(int i = 0; i < movingCoords.length; i++) {
             movingCoords[i] = triangleCoords[i];
+            // if it is an x-coordinate, add the distance traveled
             if(i % 3 == 0) {
                 movingCoords[i] += distTraveled;
             }
